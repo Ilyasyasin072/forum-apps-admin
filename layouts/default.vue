@@ -60,9 +60,10 @@
         </v-btn>
       </v-app-bar>
       <v-main>
-        <login-page v-if='this.$route.name === "auth-login"'/>
-        <v-container v-if='this.$route.name !== "auth-login"' >
-          <Nuxt/>
+        <LoadingPage v-if="showHideSpinner"/>
+        <login-page v-if='(this.$route.name === "auth-login" && !userLogin)'/>
+        <v-container>
+          <Nuxt v-if='(this.$route.name !== "auth-login" && userLogin)'/>
         </v-container>
       </v-main>
       <v-navigation-drawer
@@ -73,13 +74,21 @@
         v-if='this.$route.name !== "auth-login"'
       >
         <v-list>
-          <v-list-item @click.native="right = !right">
+          <v-list-item v-model="right">
             <v-list-item-action>
               <v-icon light>
                 mdi-repeat
               </v-icon>
             </v-list-item-action>
-            <v-list-item-title>Switch drawer (click me)</v-list-item-title>
+            <v-list-item-title>Profile</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-action @click="logout()">
+              <v-icon light>
+                mdi-repeat
+              </v-icon>
+            </v-list-item-action>
+            <v-list-item-title>Logout</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-navigation-drawer>
@@ -95,19 +104,47 @@
 
 <script>
 import LoginPage from "../pages/auth/login";
+import LoadingPage from "../components/loading/Loading.vue";
+import { runInThisContext } from "vm";
 export default {
   name: 'DefaultLayout',
-  components: {LoginPage},
+  components: {LoginPage, LoadingPage},
   computed: {
     userLogin: function() {
-      return this.$store.state.user.login.userLogin
+      return this.$store.getters["user/login/getterUserLogin"]
     },
   },
+  methods: {
+    logout() {
+        this.$store.dispatch('user/login/actionLogout');
+        this.showHideSpinner = false;
+        this.$router.go({ path: '/auth/login'})
+    }
+  },
+  beforeCreate() {
+    this.showHideSpinner = true;
+  },
   mounted() {
-    this.$store.dispatch('user/login/actionLoginUser');
+    this.$store.dispatch('user/login/actionGetUser');
+    console.log(this.userLogin)
+    if(!this.userLogin) {
+      this.$router.push({path: '/auth/login'})
+    } else {
+      this.$router.push('/')
+    }
+    setTimeout(() => {
+      this.showHideSpinner = false;
+    }, 2000)
   },
   data () {
     return {
+      showHideSpinner: true,
+      data: [
+        { title: 'Click Me' },
+        { title: 'Click Me' },
+        { title: 'Click Me' },
+        { title: 'Click Me 2' },
+      ],
       clipped: false,
       drawer: false,
       fixed: false,
@@ -115,7 +152,7 @@ export default {
         {
           icon: 'mdi-apps',
           title: 'Welcome',
-          to: '/'
+          to: '/',
         },
         {
           icon: 'mdi-chart-bubble',
@@ -131,7 +168,7 @@ export default {
           icon: 'mdi-chart-bubble',
           title: 'Categories',
           to: '/categories',
-        }
+        },
       ],
       miniVariant: false,
       right: true,

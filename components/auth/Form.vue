@@ -12,6 +12,13 @@
          Welcome to Happy Forum please put your login this apps
        </v-label>
      </v-card-title>
+     <ul v-if="error">
+      <li v-for="err in error" :key="err" v-bind:style="{color: 'red'}">
+        <v-alert
+        type="success" color="red" v-html="err"
+      ></v-alert>
+      </li>
+    </ul>
      <v-window>
        <v-window-item>
          <v-card-text>
@@ -23,6 +30,7 @@
                <v-text-field
                  label="E-mail"
                  type="email"
+                 v-model="email"
                ></v-text-field>
              </v-col>
            </v-row>
@@ -34,6 +42,7 @@
                <v-text-field
                  label="Password"
                  type="password"
+                 v-model="password"
                ></v-text-field>
              </v-col>
            </v-row>
@@ -46,11 +55,8 @@
            <v-divider></v-divider>
            <br>
            <v-row>
-             <v-col cols="10">
-               <v-subheader style="font-weight: bold;">Remember Me</v-subheader>
-             </v-col>
-             <v-col cols="2" style="text-align: right;">
-               <v-subheader style="font-weight: bold; font-size: 20px; cursor:pointer;" @click="loginForm()">
+             <v-col cols="3" offset="9" style="text-align: right;">
+               <v-subheader style="font-weight: bold; font-size: 20px; cursor:pointer;" @click="submit()">
                  <v-btn class="btn-login">
                    <span class="text-login">Login</span>
                  </v-btn>
@@ -71,7 +77,36 @@
 <script>
 export default {
   data: ()=>({
-    message: 'Form Auth'
-  })
+    message: 'Form Auth',
+    email: null,
+    password: null,
+    hideLoading: true,
+    error: [],
+  }),
+  mounted() {
+    
+  },
+  methods: {
+    submit() {
+      this.error = [];
+
+      if(!this.email == '' && !this.password == '') {
+        if(this.email != 'admin@gmail.com' && this.password != 'demo') {
+          this.error.push('Anda Bukan Admin')
+        } else {
+          this.$store.dispatch('user/login/actionLogin', { email: this.email, password: this.password});
+          this.$router.go('/');
+        }
+      }
+      
+      if(this.email == '' || this.email === null || this.email === undefined) {
+        this.error.push('Email TIdak Boleh Kosong')
+      }
+
+      if(this.password == '' || this.password === null || this.password === undefined) {
+        this.error.push('Password TIdak Boleh Kosong')
+      }
+    }
+  },
 }
 </script>

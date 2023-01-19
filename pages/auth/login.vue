@@ -14,13 +14,12 @@
 <script>
 import Form from "../../components/auth/Form";
 import Carausel from "../../components/fitur/Carausel";
-
 export default {
   name: 'LoginPage',
   components: {
     Form,
     Carausel,
-    'component-form-auth': Form
-  }
+    'component-form-auth': Form,
+  },
 }
 </script>
